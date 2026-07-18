@@ -440,6 +440,16 @@
             const auditDiv = document.getElementById('auditLog');
             auditDiv.innerHTML = auditLog.length === 0 ? '<p>No system activity recorded.</p>' : auditLog.map(log => `<p>${log}</p>`).join('');
         }
+        function showMessage(message, type) {
+            const msgDiv = document.getElementById('statusMessage');
+            msgDiv.textContent = message;
+            msgDiv.className = `message show ${type}`;
+            
+            // Automatically hide the message after 6 seconds
+            setTimeout(() => {
+                msgDiv.classList.remove('show');
+            }, 6000);
+        }
     </script>
 </body>
 </html>
