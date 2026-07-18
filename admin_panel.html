@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SRM Valliammai Exam Portal</title>
+    <!-- Fixed Excel Library Link -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f5f7;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* 1. Header Section (Identical to Student Portal) */
+        .header {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 25px 15px;
+            
+        }
+
+        .header h1 {
+            color: #182456; /* SRM Navy Blue */
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: #d2141a; /* Official Red */
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header .address {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .admin-banner {
+            background-color: #182456;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+            border-top: 4px solid #ff1493;
+            border-bottom: 4px solid #ff1493;
+        }
+
+        /* Container & Cards */
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ccc;
+            border-top: 4px solid #182456;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            color: #182456;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Forms & Inputs */
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #aaa;
+            font-size: 14px;
+        }
+
+        input[type="email"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #182456;
+        }
+
+        /* Buttons */
+        button {
+            padding: 12px 20px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-green { background: #4caf50; }
+        .btn-green:hover { background: #45a049; }
+        .btn-green:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .btn-pink { background: #ff1493; margin-top: 15px;}
+        .btn-pink:hover { background: #e61284; }
+
+        .btn-logout {
+            background: #d2141a;
+            width: auto;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        /* Dashboard Elements */
+        .dashboard-section { display: none; }
+        .dashboard-section.active { display: block; }
+        
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 15px;
+        }
+
+        .top-actions h2 {
+            color: #182456;
+            font-size: 18px;
+        }
+
+        .upload-box {
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper {
+            margin: 15px 0;
+        }
+
+        .file-name { 
+            margin-top: 10px; 
+            font-size: 13px; 
+            font-weight: bold; 
+            color: #182456; 
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f4f5f7;
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .stat-value {
+            font-size: 20px;
+            color: #182456;
+            font-weight: bold;
+        }
+
+        /* Messages */
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        .message.show { display: block; }
+        .message.error { background: #ff1493; color: white; border: 1px solid #d9107d; }
+        .message.success { background: #4caf50; color: white; border: 1px solid #3d8c40; }
+        .message.info { background: #182456; color: white; border: 1px solid #0f1738; }
+
+        .audit-log {
+            font-size: 12px;
+            color: #333;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #fff;
+        }
+        .audit-log p { border-bottom: 1px dotted #ccc; padding: 6px 0; }
+        .audit-log p:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header">
+        <h1>SRM VALLIAMMAI ENGINEERING COLLEGE</h1>
+        <p class="subtitle">( An Autonomous Institution )</p>
+        <p class="address">Approved by AICTE | Affiliated to Anna University, Chennai | Accredited by NBA</p>
+    </div>
+    <div class="admin-banner">
+        CONTROLLER OF EXAMINATIONS - SECURE DATA PORTAL
+    </div>
+
+    <div class="container">
+        <div class="message" id="statusMessage"></div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="card">
+            <h2 class="card-title">Authorized Personnel Login</h2>
+            <form onsubmit="handleLogin(event)">
+                <label>Staff Email ID</label>
+                <input type="email" id="email" placeholder="e.g. exam.coordinator@srm.edu.in" required>
+                
+                <label>System Password</label>
+                <input type="password" id="password" required>
+                
+                <button type="submit" class="btn-green">Authenticate</button>
+            </form>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="dashboard-section" id="dashboardSection">
+            <div class="card">
+                <div class="top-actions">
+                    <h2>Database Management</h2>
+                    <button class="btn-logout" onclick="handleLogout()">Terminate Session</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Allocated Students</div>
+                        <div class="stat-value" id="totalRecords">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Last Database Update</div>
+                        <div class="stat-value" id="lastUpdated" style="font-size: 14px; margin-top: 4px;">Never</div>
+                    </div>
+                </div>
+
+                <div class="upload-box">
+                    <label>Master Excel File Upload (.xlsx)</label>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Required columns: Register_No, Block, Floor, Room, Seat</p>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" accept=".xlsx" onchange="handleFileSelect(event)">
+                    </div>
+                    <div class="file-name" id="fileName"></div>
+                    <button class="btn-green" id="uploadBtn" onclick="uploadData()" disabled style="margin-top: 15px;">Upload & Overwrite Current Data</button>
+                </div>
+
+                <button class="btn-pink" onclick="deleteAllData()">PURGE ENTIRE DATABASE</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="font-size: 14px;">System Audit Log</h2>
+                <div class="audit-log" id="auditLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- PUT YOUR SUPABASE KEYS HERE ---
+        const SUPABASE_URL = 'https://qpzsjqelnwycoemnlxri.supabase.co/rest/v1/'; 
+        const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwenNqcWVsbnd5Y29lbW5seHJpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzI2MTgxMSwiZXhwIjoyMDk4ODM3ODExfQ.HLDHmP8aeaMJ5fegXKUfMRWFkVIv5MkIKGa9XnKvcUg';
+        
+        const VALID_CREDENTIALS = {
+            email: 'exam.coordinator@srm.edu.in',
+            password: 'SecurePass123!@' 
+        };
+
+        let selectedFile = null;
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email === VALID_CREDENTIALS.email && password === VALID_CREDENTIALS.password) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').classList.add('active');
+                loadDataStats();
+                loadAuditLog();
+            } else {
+                showMessage('Authentication Failed: Invalid credentials.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').classList.remove('active');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            selectedFile = null;
+        }
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            document.getElementById('fileName').textContent = selectedFile ? `Selected File: ${selectedFile.name}` : '';
+            document.getElementById('uploadBtn').disabled = !selectedFile;
+        }
+
+        async function uploadData() {
+            if (!selectedFile) return;
+            showMessage('Processing file and establishing secure connection...', 'info');
+
+            try {
+                const data = await readExcelFile(selectedFile);
+                const validData = validateExcelData(data);
+                
+                if (validData.length === 0) throw new Error('Format Error: Missing required columns in Excel file.');
+
+                await deleteData();
+                await insertData(validData);
+                
+                showMessage(`System Update Successful: ${validData.length} records processed.`, 'success');
+                logAudit(`System Update: ${validData.length} records processed from [${selectedFile.name}]`);
+                
+                await loadDataStats();
+                await loadAuditLog();
+
+                selectedFile = null;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('fileName').textContent = '';
+                document.getElementById('uploadBtn').disabled = true;
+
+            } catch (error) {
+                showMessage(`System Error: ${error.message}`, 'error');
+            }
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const workbook = XLSX.read(e.target.result);
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        resolve(XLSX.utils.sheet_to_json(worksheet));
+                    } catch (error) { reject(error); }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function validateExcelData(data) {
+            return data.filter(row => row.Register_No && row.Block && row.Floor && row.Room && row.Seat)
+                .map(row => ({
+                    register_no: String(row.Register_No).trim(),
+                    block: String(row.Block).trim(),
+                    floor: String(row.Floor).trim(),
+                    room: String(row.Room).trim(),
+                    seat: String(row.Seat).trim()
+                }));
+        }
+
+        async function deleteData() {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations`, {
+                method: 'DELETE',
+                headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) throw new Error('Database cleanup failed.');
+        }
+
+        async function insertData(data) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations`, {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Data insertion failed.');
+        }
+
+        async function deleteAllData() {
+            if (confirm('CRITICAL WARNING: This action will permanently erase all seating data from the active database. Proceed?')) {
+                try {
+                    showMessage('Executing database purge...', 'info');
+                    await deleteData();
+                    showMessage('Database purged successfully.', 'success');
+                    logAudit('Administrator executed manual database purge.');
+                    await loadDataStats();
+                    await loadAuditLog();
+                } catch (error) { showMessage(`Error: ${error.message}`, 'error'); }
+            }
+        }
+
+        async function loadDataStats() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations?select=count()`, {
+                    headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+                });
+                const data = await response.json();
+                const count = data[0]?.count || 0;
+                document.getElementById('totalRecords').textContent = count;
+                if (count > 0) document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+            } catch (error) { console.error(error); }
+        }
+
+        function logAudit(message) {
+            const timestamp = new Date().toLocaleString();
+            let auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
+            auditLog.unshift(`[${timestamp}] ${message}`);
+            localStorage.setItem('auditLog', JSON.stringify(auditLog.slice(0, 10)));
+        }
+
+        function loadAuditLog() {
+            const auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
+            const auditDiv = document.getElementById('auditLog');
+            auditDiv.innerHTML = auditLog.length === 0 ? '<p>No system activity recorded.</p>' : auditLog.map(log => `<p>${log}</p>`).join('');
+        }
+    </script>
+</body>
+</html>
