@@ -292,6 +292,17 @@
     </div>
 
     <script>
+        // Move the function right here, at the very top of the script
+        function showMessage(message, type) {
+            const msgDiv = document.getElementById('statusMessage');
+            msgDiv.textContent = message;
+            msgDiv.className = `message show ${type}`;
+            setTimeout(() => {
+                msgDiv.classList.remove('show');
+            }, 6000);
+        }
+
+        // ... rest of your code ...
         // --- PUT YOUR SUPABASE KEYS HERE ---
         const SUPABASE_URL = 'https://qpzsjqelnwycoemnlxri.supabase.co/rest/v1/'; 
         const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwenNqcWVsbnd5Y29lbW5seHJpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzI2MTgxMSwiZXhwIjoyMDk4ODM3ODExfQ.HLDHmP8aeaMJ5fegXKUfMRWFkVIv5MkIKGa9XnKvcUg';
@@ -439,16 +450,6 @@
             const auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
             const auditDiv = document.getElementById('auditLog');
             auditDiv.innerHTML = auditLog.length === 0 ? '<p>No system activity recorded.</p>' : auditLog.map(log => `<p>${log}</p>`).join('');
-        }
-        function showMessage(message, type) {
-            const msgDiv = document.getElementById('statusMessage');
-            msgDiv.textContent = message;
-            msgDiv.className = `message show ${type}`;
-            
-            // Automatically hide the message after 6 seconds
-            setTimeout(() => {
-                msgDiv.classList.remove('show');
-            }, 6000);
         }
     </script>
 </body>
