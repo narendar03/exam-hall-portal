@@ -397,11 +397,22 @@
         }
 
         async function deleteData() {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations`, {
+            // Added '?register_no=not.is.null' as a filter to bypass Supabase's safety lock
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations?register_no=not.is.null`, {
                 method: 'DELETE',
-                headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' }
+                headers: { 
+                    'apikey': SUPABASE_SERVICE_KEY, 
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, 
+                    'Content-Type': 'application/json' 
+                }
             });
-            if (!response.ok) throw new Error('Database cleanup failed.');
+            
+            if (!response.ok) {
+                // This will print the exact reason to the console if it fails again
+                const errDetails = await response.text();
+                console.error("Supabase Error Details:", errDetails);
+                throw new Error('Database cleanup failed. Check F12 Console for details.');
+            }
         }
 
         async function insertData(data) {
