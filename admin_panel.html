@@ -439,14 +439,23 @@
 
         async function loadDataStats() {
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations?select=count()`, {
+                // We ask the database to just return the register numbers to quickly count them
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_allocations?select=register_no`, {
                     headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
                 });
+                
+                if (!response.ok) throw new Error('Could not fetch stats');
+                
                 const data = await response.json();
-                const count = data[0]?.count || 0;
+                const count = data.length;
+                
                 document.getElementById('totalRecords').textContent = count;
-                if (count > 0) document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-            } catch (error) { console.error(error); }
+                if (count > 0) {
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                }
+            } catch (error) { 
+                console.error("Dashboard Stats Error:", error); 
+            }
         }
 
         function logAudit(message) {
